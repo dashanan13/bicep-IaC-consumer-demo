@@ -1,0 +1,23 @@
+New-AzResourceGroupDeployment `
+-Name "Deploy_resources_to_RG" `
+-TemplateFile .\SampleDeploymentPipeline\BOS-Sample-IaC-Deploy-withPowershell-and-PipelineVariables\OtherResourcesDeploy-withscope.bicep `
+-ResourceGroupName 'bos-ptf-dev-rg-mictesting' `
+-envCode 'dev' `
+-location 'northeurope' `
+-ownerteam 'Platform' `
+-assetowner 'mohit sharma' `
+-criticality 'Low' `
+-projectCode 'PTF' `
+-locationCode 'noe' `
+-classification 'Public' `
+-sequenceKV '017' `
+-detailedPurposeKV 'keyvault created for testing the templates' `
+-sequenceNSG '014' `
+-detailedPurposeNSG 'NSG created for testing the templates' `
+-sequenceVNET '014' `
+-detailedPurposeVNET 'VNET created for testing the templates' `
+-sequencePIP '014' `
+-detailedPurposePIP 'PIP created for testing the templates' `
+-vnetAddressPrefix '192.168.0.0/16' `
+-sequenceSVNET '001' `
+-subnetPrefix '192.168.0.0/24'

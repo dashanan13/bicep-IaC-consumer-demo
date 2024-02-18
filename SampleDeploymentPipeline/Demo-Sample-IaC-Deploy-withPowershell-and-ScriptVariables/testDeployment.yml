@@ -1,0 +1,75 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - 'SampleDeploymentPipeline/BOS-Sample-IaC-Deploy-withPowershell-and-ScriptVariables/**'
+
+pool:
+  name: ubuntu
+
+variables: 
+- name: ServiceConnectionName
+  value: IaC-Pipelinetest-SC
+- name: DeploymentLocation
+  value: norwayeast
+- name: subscriptionID
+  value: '2638031b-e819-4081-bacf-43f23a07121c'
+- name: ResourceGroupName
+  value: RG-Management
+- name: envCode
+  value: 'dev'
+- name: location
+  value: 'norwayeast'
+- name: ownerteam
+  value: 'TEAM1'
+- name: assetowner
+  value: 'mohit sharma'
+- name: criticality
+  value: 'Low'
+- name: projectCode
+  value: 'TEM1'
+- name: locationCode
+  value: 'noe'
+- name: classification
+  value: 'Public'
+- name: purposeShortRG
+  value: 'mictesting'
+- name: detailedPurposeRG
+  value: 'resource group created in target subscription'
+- name: detailedPurposeKV
+  value: 'keyvault created for testing the template'
+- name: sequenceKV
+  value: 003
+- name: detailedPurposeNSG
+  value: 'NSG created for testing the templates'
+- name: sequenceNSG
+  value: 003
+- name: detailedPurposeVNET
+  value: 'VNET created for testing the templates'
+- name: sequenceVNET
+  value: 003
+- name: detailedPurposePIP
+  value: 'PIP created for testing the templates'
+- name: sequencePIP
+  value: 003
+
+- name: vnetAddressPrefix
+  value: '192.168.0.0/16'
+- name: sequenceSVNET
+  value: 003
+- name: subnetPrefix
+  value: '192.168.0.0/24'
+
+jobs:
+- job:
+  steps:
+
+  - task: AzurePowerShell@5
+    inputs:
+      azureSubscription: 'IaC-Pipelinetest-SC'
+      ScriptType: 'FilePath'
+      ScriptPath: './SampleDeploymentPipeline/BOS-Sample-IaC-Deploy-withPowershell-and-ScriptVariables/resourceDeploy.ps1'
+      azurePowerShellVersion: 'LatestVersion'

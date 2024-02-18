@@ -1,0 +1,31 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - 'SampleDeploymentPipeline/BOS-Sample-IaC-Deploy-withPowershell-and-PipelineVariables/**'
+
+pool:
+  name: ubuntu
+
+variables: 
+- name: ServiceConnectionName
+  value: IaC-Pipelinetest-SC
+- name: DeploymentLocation
+  value: norwayeast
+- name: ResourceGroupName
+  value: RG-Management
+
+jobs:
+- job:
+  steps:
+
+  - task: AzurePowerShell@5
+    inputs:
+      azureSubscription: 'IaC-Pipelinetest-SC'
+      ScriptType: 'FilePath'
+      ScriptPath: './SampleDeploymentPipeline/BOS-Sample-IaC-Deploy-withPowershell-and-PipelineVariables/resourceDeploy.ps1'
+      azurePowerShellVersion: 'LatestVersion'
+      

@@ -1,0 +1,118 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - 'SampleDeploymentPipeline/BOS-Sample-IaC-Deploy-withJustYAML/**'
+
+pool:
+  name: ubuntu
+
+variables: 
+- name: ServiceConnectionName
+  value: IaC-Pipelinetest-SC
+- name: DeploymentLocation
+  value: norwayeast
+- name: subscriptionID
+  value: '2638031b-e819-4081-bacf-43f23a07121c'
+- name: ResourceGroupName
+  value: RG-Management
+- name: envCode
+  value: 'dev'
+- name: location
+  value: 'norwayeast'
+- name: ownerteam
+  value: 'TEAM1'
+- name: assetowner
+  value: 'mohit sharma'
+- name: criticality
+  value: 'Low'
+- name: projectCode
+  value: 'TEM1'
+- name: locationCode
+  value: 'noe'
+- name: classification
+  value: 'Public'
+- name: purposeShortRG
+  value: 'mictesting'
+- name: detailedPurposeRG
+  value: 'resource group created in target subscriptions'
+- name: detailedPurposeKV
+  value: 'keyvault created for testing the templates'
+- name: sequenceKV
+  value: 016
+- name: detailedPurposeNSG
+  value: 'NSG created for testing the templates'
+- name: sequenceNSG
+  value: 014
+- name: detailedPurposeVNET
+  value: 'VNET created for testing the templates'
+- name: sequenceVNET
+  value: 014
+- name: vnetAddressPrefix
+  value: '192.168.0.0/16'
+- name: detailedPurposePIP
+  value: 'PIP created for testing the templates'
+- name: sequencePIP
+  value: 014
+- name: subnetPrefix
+  value: '192.168.0.0/24'
+
+
+jobs:
+- job:
+  steps:
+
+  - task: UseDotNet@2
+    inputs:
+      packageType: 'sdk'
+      version: '3.1.x'
+      installationPath: $(Agent.ToolsDirectory)/dotnet
+
+
+
+  - task: AzureResourceManagerTemplateDeployment@3
+    inputs:
+      azureResourceManagerConnection: $(ServiceConnectionName)
+      subscriptionId: $(SubscriptionId)
+      resourceGroupName: $(ResourceGroupName)
+      location: 'Norway East'
+      templateLocation: 'Linked artifact'
+      csmFile: 'SampleDeploymentPipeline/BOS-Sample-IaC-Deploy-withJustYAML/resourcegroupDeploy.bicep'
+      overrideParameters: '-envCode "$(envCode)" -location "$(location)" -ownerteam "$(ownerteam)" -assetowner "$(assetowner)" -criticality "$(criticality)" -projectCode "$(projectCode)" -classification "$(classification)" -purposeShortRG "$(purposeShortRG)" -detailedPurposeRG "$(detailedPurposeRG)" -SubscriptionID "$(SubscriptionId)"'
+      deploymentMode: 'Incremental'
+      deploymentName: 'Deploy_new_ResourceGroup'
+      deploymentOutputs: 'deploymentOutputs'
+
+
+  - bash: |
+      echo $(deploymentOutputs)
+
+  - bash: |
+      echo "##vso[task.setvariable variable=ResourceGroupScopeName]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.scopeResourceGroupName.value')"
+      
+    name: SaveDeploymentOutputs
+    displayName: Save deployment outputs into variables
+    env:
+      DEPLOYMENT_OUTPUTS: $(deploymentOutputs)
+    
+  - bash: |
+      echo $(DEPLOYMENT_OUTPUTS)
+
+  - bash: |
+      echo $(ResourceGroupScopeName)
+
+  - task: AzureResourceManagerTemplateDeployment@3
+    inputs:
+      deploymentScope: 'Resource Group'
+      azureResourceManagerConnection: $(ServiceConnectionName)
+      subscriptionId: $(SubscriptionId)
+      action: 'Create Or Update Resource Group'
+      resourceGroupName: $(ResourceGroupScopeName)
+      location: $(DeploymentLocation)
+      csmFile: 'SampleDeploymentPipeline/BOS-Sample-IaC-Deploy-withJustYAML/OtherResourcesDeploy-withscope.bicep'
+      deploymentMode: 'Incremental'
+      deploymentName: 'Deploy_resource_to_ResourceGroup'
+      overrideParameters: '-envCode "$(envCode)" -location "$(location)" -ownerteam "$(ownerteam)" -assetowner "$(assetowner)" -criticality "$(criticality)" -projectCode "$(projectCode)" -locationCode "$(locationCode)" -classification "$(classification)" -detailedPurposeKV "$(detailedPurposeKV)" -sequenceKV "$(sequenceKV)" -detailedPurposeNSG "$(detailedPurposeNSG)" -sequenceNSG "$(sequenceNSG)" -detailedPurposeVNET "$(detailedPurposeVNET)" -sequenceVNET "$(sequenceVNET)" -detailedPurposePIP "$(detailedPurposePIP)" -sequencePIP "$(sequencePIP)" -vnetAddressPrefix "$(vnetAddressPrefix)" -subnetPrefix "$(subnetPrefix)"'
